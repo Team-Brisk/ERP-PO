@@ -1,0 +1,142 @@
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+.app-bg {
+  background: rgb(255, 126, 54);
+  background: linear-gradient(0deg, rgba(255, 126, 54, 1) 1%, rgba(255, 112, 31, 0.8016456582633054) 49%, rgba(255, 181, 139, 0.9136904761904762) 98%);
+}
+
+/* sweet alert */
+.swal2-container {
+  z-index: 20000 !important;
+}
+
+/* border alert */
+/* .swal2-popup {
+  border: 3px solid #FF7E36;  
+  border-radius: 12px;
+} */
+
+/* toast message specific use */
+.toast-message {
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Customize the button positions */
+.swal2-confirm {
+  order: 1;
+  /* Set the order property to -1 to move it to the left */
+}
+
+.swal2-cancel {
+  order: -1;
+  /* Set the order property to 1 to move it to the right */
+}
+
+/* scroll bar
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ededed;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ededed;
+}
+
+html,
+body {
+  max-width: 100vw;
+  /* overflow-x: hidden; */
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: "TT-HovesPro-TrialRegular", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+@font-face {
+  font-family: "TT-HovesPro-TrialRegular";
+  src: url("/fonts/TT-HovesPro-TrialRegular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "TT-Hoves Pro-Trial-Bold";
+  src: url("/fonts/TT-Hoves Pro-Trial-Bold.ttf") format("truetype");
+}
+@media print {
+  .page-break {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  .a4_border {
+    border: 1px solid black;
+    border-collapse: collapse;
+  }
+@media print {
+    body * {
+      visibility: hidden;
+    }
+  
+    #print-area, #print-area * {
+      visibility: visible;
+    }
+  
+    #print-area {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+  
+    .print\:hidden {
+      display: none !important;
+    }
+  
+    .page-break {
+      page-break-before: always;
+    }
+  }
+  
+}

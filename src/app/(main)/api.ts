@@ -1,0 +1,1 @@
+export const BASE_API = String(process.env.NEXT_PUBLIC_API_MINILOAD)

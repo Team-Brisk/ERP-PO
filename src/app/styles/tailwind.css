@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    img {
+        @apply inline-block;
+    }
+}
+
+@layer components {
+
+    /* Not Sure ---------------------------------------------------------------------------------------------------------------------*/
+    .page-full {
+        @apply w-full h-screen flex justify-center
+    }
+
+    .tw-container {
+        @apply max-w-[1200px] w-[90%] flex flex-col p-8
+    }
+
+    .divider {
+        @apply h-[1px] bg-gray-300 w-full my-2
+    }
+
+    .card {
+        @apply bg-white rounded-md shadow-lg
+    }
+
+    .card-header {
+        @apply w-full flex flex-row justify-between items-end
+    }
+
+    .mini-btn-success {
+        @apply p-2 text-white bg-green-500 hover:bg-green-700 duration-200 cursor-pointer rounded-md
+    }
+
+    /* tag */
+    .tag-primary {
+        @apply px-2.5 py-0.5 rounded-md bg-blue-500 text-white
+    }
+
+    .tag-secondary {
+        @apply px-2.5 py-0.5 rounded-md bg-gray-500 text-white
+    }
+
+    .tag-error {
+        @apply px-2.5 py-0.5 rounded-md bg-red-500 text-white
+    }
+
+    .tag-success {
+        @apply px-2.5 py-0.5 rounded-md bg-green-500 text-white
+    }
+
+    .tag-minimal {
+        @apply px-4 py-2 rounded-md shadow-xl bg-white hover:-translate-y-1.5 duration-500 font-extralight
+    }
+
+    .tag-orange-lighter {
+        @apply px-4 py-1 rounded-md obj-center shadow-xl text-orange-500 bg-white hover:-translate-y-0.5 duration-500 font-extralight border-[1px] border-orange-500
+    }
+
+    .tag-gray-lighter {
+        @apply px-4 py-1 rounded-md obj-center shadow-xl text-gray-400 bg-white hover:-translate-y-0.5 duration-500 font-extralight border-[1px] border-gray-400
+    }
+
+    /* modal*/
+    .modal {
+        @apply flex justify-center items-center
+    }
+
+    .modal-box {
+        @apply bg-white rounded-xl p-5
+    }
+
+    /* site */
+    .site-card-bar-head {
+        @apply bg-gray-600 rounded-xl
+    }
+
+    .site-card {
+        @apply w-full flex flex-col bg-gray-900 py-6 px-6 rounded-xl text-white duration-300 hover:-translate-y-2 hover:translate-x-2
+    }
+
+    .t-head-side {
+        @apply pl-6 py-2 text-xl
+    }
+
+    /* common */
+    .container {
+        @apply max-w-[1536px]
+    }
+
+    .obj-center {
+        @apply flex justify-center items-center
+    }
+
+    /* table */
+    .line-table {
+        @apply border-2 border-orange-500
+    }
+
+    .line-table-gray {
+        @apply border-2 border-gray-200
+    }
+
+    .table-hover-gray {
+        @apply hover:bg-gray-50 cursor-pointer
+    }
+
+    .table-hover-orange {
+        @apply hover:bg-orange-500 cursor-pointer hover:text-white
+    }
+
+    /* button */
+    .btn-grey {
+        @apply bg-gray-600 hover:bg-gray-700 text-white
+    }
+
+    .btn-primary {
+        @apply bg-blue-500 hover:bg-blue-600 text-white
+    }
+
+    .btn-primary-disabled {
+        @apply bg-blue-300 text-white
+    }
+
+    .btn-danger {
+        @apply bg-red-500 hover:bg-red-600 text-white
+    }
+
+    .btn-minimal {
+        @apply bg-white shadow-lg hover:shadow-xl cursor-pointer duration-300 hover:bg-gray-50 rounded-lg hover:-translate-y-1 border-[1px]
+    }
+
+    .btn-minimal-reverse {
+        @apply bg-orange-500 shadow-lg hover:shadow-xl cursor-pointer duration-300 rounded-lg hover:-translate-y-1 border-[1px]
+    }
+
+    .btn-minimal-disabled {
+        @apply bg-gray-100 duration-300 rounded-lg text-gray-400 border-[1px]
+    }
+
+    .btn-danger-outline {
+        @apply rounded-md bg-white border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white duration-200
+    }
+
+    .btn-icon-short {
+        @apply w-[45px] h-[45px] obj-center rounded-md bg-white shadow-lg cursor-pointer hover:-translate-y-1 hover:bg-gray-100 duration-500
+    }
+
+    .btn-pagination {
+        @apply w-auto h-[40px] shadow-xl obj-center rounded-md px-4 text-orange-500 bg-white border-2 hover:-translate-y-1 duration-500 cursor-pointer
+    }
+
+    .btn-pagination-disabled {
+        @apply w-auto h-[40px] shadow-xl obj-center rounded-md px-4 text-gray-400 bg-white border-2
+    }
+
+    /* card */
+    .card-select {
+        @apply bg-white shadow-xl border-2 border-orange-500 rounded-lg;
+    }
+
+    .card-minimal {
+        @apply bg-white rounded-md shadow-md
+    }
+
+    .card-expand {
+        @apply transition-[max-height] duration-500 overflow-hidden
+    }
+
+    .a4_border {
+        @apply border-[1px] border-black
+    }
+}
