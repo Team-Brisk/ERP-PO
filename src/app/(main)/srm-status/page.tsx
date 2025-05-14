@@ -1,192 +1,188 @@
+'use client';
+import {
+  Container, TextField, Button, Typography, Checkbox, FormControlLabel,
+  Select, MenuItem, InputLabel, FormControl, Radio, RadioGroup, FormLabel,
+  Paper, Grid, Box
+} from '@mui/material';
+import { useForm, Controller } from 'react-hook-form';
+import SendIcon from '@mui/icons-material/Send';
+import { useStoreData } from '@/app/hooks/useStoreData';
+import { useEffect } from 'react';
 
-'use client'
+type FormValues = {
+  storeBill: string;
+  storeRecv: string;
+  ordNo: string;
+  userMode: 'one' | 'all';
+  userId?: string;
+  billType: 'type1' | 'type2';
+  include55: boolean;
+  exportPrint: boolean;
+};
 
-import { useEffect, useRef, useState } from "react";
-import { BASE_API } from "@/app/(main)/api";
-import io, { Socket } from "socket.io-client";
-import axios from '@/app/config/axiosConfig';
-import { errorMessage } from "@/utils/messageAlert";
-import Chip from '@mui/material/Chip';
-import { Card, CircularProgress, Divider, ToggleButton } from "@mui/material";
-import SRMCommandBtn from "@/app/components/button/SRMCommandBtn";
-import { Credential, Role } from "@/models/users";
-import { useRouter } from "next/navigation";
-import { useStoreData } from "@/app/hooks/useStoreData";
-import { AnimatePresence, motion } from "framer-motion";
+export default function BillOrderPage() {
+  const { control, handleSubmit, watch } = useForm<FormValues>({
+    defaultValues: {
+      storeBill: '',
+      storeRecv: '',
+      ordNo: 'OrdNo',
+      userMode: 'one',
+      billType: 'type1',
+      include55: false,
+      exportPrint: true
+    }
+  });
 
-export interface SrmRealtimeRoom {
-    dist_x: string | number;
-    dist_y: string | number;
-    D0147: string;
-    D0148: string;
-    D0149: string;
-    D0328: string;
-    online: boolean;
-    room: string;
-    status?: string;
-    order_work?: string
-}
+  const userMode = watch('userMode');
+  const setPageTitle = useStoreData((state) => state.setPageTitle)
+  const onSubmit = (data: FormValues) => {
+    console.log('Form Submitted:', data);
+  };
+  useEffect(() => {
+    setPageTitle("ฺBill");
+  }, [setPageTitle]);
+  return (
+    <Container maxWidth="md" sx={{ mt: 5 }}>
+      <Paper elevation={4} sx={{ p: 5, borderRadius: 4, background: '#ffffff' }}>
+        <Typography
+          variant="h4"
+          gutterBottom
+          align="center"
+          sx={{ fontWeight: 700, color: '#1976d2' }}
+        >
+          🧾 ใบสั่งซื้อ (Bill Order)
+        </Typography>
 
-export default function SrmStatus() {
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={3}>
+            {/* ร้านต้นทาง */}
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel id="storeBill-label">สาขาผู้สั่ง</InputLabel>
+                <Controller
+                  name="storeBill"
+                  control={control}
+                  render={({ field }) => (
+                    <Select labelId="storeBill-label" label="สาขาผู้สั่ง" {...field}>
+                      <MenuItem value="branch1">สาขา 1</MenuItem>
+                      <MenuItem value="branch2">สาขา 2</MenuItem>
+                    </Select>
+                  )}
+                />
+              </FormControl>
+            </Grid>
 
-    const router = useRouter()
+            {/* ร้านปลายทาง */}
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel id="storeRecv-label">สาขาผู้รับ</InputLabel>
+                <Controller
+                  name="storeRecv"
+                  control={control}
+                  render={({ field }) => (
+                    <Select labelId="storeRecv-label" label="สาขาผู้รับ" {...field}>
+                      <MenuItem value="branchA">สาขา A</MenuItem>
+                      <MenuItem value="branchB">สาขา B</MenuItem>
+                    </Select>
+                  )}
+                />
+              </FormControl>
+            </Grid>
 
-    const setPageTitle = useStoreData((state) => state.setPageTitle)
+            {/* ประเภทใบสั่ง */}
+            <Grid item xs={12} md={6}>
+              <FormControl component="fieldset" fullWidth>
+                <FormLabel>ประเภทใบสั่ง</FormLabel>
+                <Controller
+                  name="billType"
+                  control={control}
+                  render={({ field }) => (
+                    <RadioGroup row {...field}>
+                      <FormControlLabel value="type1" control={<Radio />} label="ทั่วไป" />
+                      <FormControlLabel value="type2" control={<Radio />} label="ปัจจุบัน" />
+                    </RadioGroup>
+                  )}
+                />
+              </FormControl>
+            </Grid>
 
-    const [opcData, setOpcData] = useState<SrmRealtimeRoom[]>([]);
-    const [socketInst, setSocketInst] = useState<Socket | undefined>(undefined);
-    const [loading, setLoading] = useState(true);
-    const [role, setRole] = useState<Role>(0)
+            {/* สิทธิ์ */}
+            <Grid item xs={12} md={6}>
+              <FormControl component="fieldset" fullWidth>
+                <FormLabel>สิทธิ์การดูข้อมูล</FormLabel>
+                <Controller
+                  name="userMode"
+                  control={control}
+                  render={({ field }) => (
+                    <RadioGroup row {...field}>
+                      <FormControlLabel value="one" control={<Radio />} label="ของผู้ใช้คนเดียว" />
+                      <FormControlLabel value="all" control={<Radio />} label="ทั้งหมด" />
+                    </RadioGroup>
+                  )}
+                />
+              </FormControl>
+            </Grid>
 
-    const hasCalledRef = useRef(false);
+            {/* User ID ถ้าเลือก one */}
+            {userMode === 'one' && (
+              <Grid item xs={12}>
+                <Controller
+                  name="userId"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField fullWidth label="User ID" {...field} />
+                  )}
+                />
+              </Grid>
+            )}
 
-    const nodes = [
-        'LINE01-MP', 'LINE02-MP', 'LINE03-MP', 'LINE04-MP',
-        'LINE05-MP', 'LINE06-MP', 'LINE07-MP', 'LINE08-MP'
-    ];
+            {/* ออปชัน */}
+            <Grid item xs={12}>
+              <Box display="flex" flexDirection="column">
+                <FormControlLabel
+                  control={
+                    <Controller
+                      name="include55"
+                      control={control}
+                      render={({ field }) => <Checkbox {...field} />}
+                    />
+                  }
+                  label="กรณีมีภาษี 5.5%"
+                />
+                <FormControlLabel
+                  control={
+                    <Controller
+                      name="exportPrint"
+                      control={control}
+                      render={({ field }) => <Checkbox {...field} />}
+                    />
+                  }
+                  label="ออกพิมพ์"
+                />
+              </Box>
+            </Grid>
+          </Grid>
 
-    useEffect(() => {
-        setPageTitle('สถานะเครน')
-        document.title = 'สถานะเครน'
-        if (!hasCalledRef.current) {
-            getFirstStatusRoom();
-            hasCalledRef.current = true;
-        }
-
-        const credential = JSON.parse(localStorage.getItem('Credential')!) as Credential
-        if (!credential) {
-            router.push('/login');
-            return;
-        }
-        const role = credential.userData.role
-        setRole(role)
-
-        const socket: Socket = io(BASE_API);
-        setSocketInst(socket);
-
-        let rooms = nodes.map(room => room + '-STATUS-ROOM');
-
-        socket.on("connect", () => {
-            rooms.forEach(room => socket.emit("join_room", { room }));
-        });
-
-        socket.on("receive_data", (data: any) => {
-            const { room } = data;
-            if (room) {
-                setOpcData((prev) => {
-                    const index = prev.findIndex(item => item.room === room);
-                    if (index !== -1) {
-                        const updatedRoom = { ...prev[index], ...data };
-                        const newArr = [...prev];
-                        newArr[index] = updatedRoom;
-                        return newArr;
-                    }
-                    return [...prev, data];
-                });
-            } else {
-                console.warn("Received data without room info:", data);
-            }
-        });
-
-        return () => {
-            socket.disconnect();
-        };
-    }, []);
-
-    const getFirstStatusRoom = async () => {
-        try {
-            const res = await axios.post(`${BASE_API}/get_current_srm_status`, { nodes: JSON.stringify(nodes) });
-            const srmRealTime = res.data.nodes as SrmRealtimeRoom[];
-            setOpcData(srmRealTime);
-        } catch (err: any) {
-            errorMessage(err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <div className="p-4 text-black bg-gray-50 min-h-screen w-full">
-            <div className=" w-full flex justify-center items-center">
-                {loading ? (
-                    <div className="w-full h-[calc(100vh-128px)] flex justify-center items-center">
-                        <CircularProgress size={50} />
-                    </div>
-                ) : (opcData.length === 0) ? (
-                    <div className="w-full h-full flex justify-center items-center">
-                        <p className="text-gray-500 col-span-full text-center">ไม่มีข้อมูลแสดงผล</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full h-full">
-                        {opcData.map((roomData, index) => (
-                            <Card className="relative bg-white p-4 rounded-md border h-full"
-                                key={roomData.room || index}>
-                                <div className="flex justify-between items-center">
-                                    <h2 className="text-lg font-semibold text-gray-700">
-                                        {roomData.room?.split('-')[0]}
-                                    </h2>
-                                    <div className="flex justify-end gap-2">
-                                        {(role === 1 || role === 2) &&
-                                            (<>
-                                                <SRMCommandBtn
-                                                    isDisable={(roomData?.online) ? false : true}
-                                                    size="small"
-                                                    pathOpc={roomData.room?.split('-')[0] + '-MP'} />
-                                            </>)
-                                        }
-                                        <ToggleButton
-                                            onClick={(e) => e.preventDefault()}
-                                            sx={{
-                                                pointerEvents: "none",
-                                                '&:hover': { backgroundColor: 'transparent' },
-                                                '&:focus': { outline: 'none', boxShadow: 'none' },
-                                                '&:active': { backgroundColor: 'transparent' }
-                                            }}
-                                            className={`${(roomData?.online)
-                                                ? 'text-white bg-green-500'
-                                                : 'bg-red-500 text-white'} font-extrabold px-3`}
-                                            size="small"
-                                            value={'unknow'}
-                                        >
-                                            <span>
-                                                {(roomData?.online) ? 'ออนไลน์' : 'ออฟไลน์'}
-                                            </span>
-                                        </ToggleButton>
-                                    </div>
-                                </div>
-
-                                <hr className="my-2 border-gray-300" />
-
-                                <div className="text-sm space-y-1">
-                                    <div className="flex justify-between">
-                                        <span className="">สถานะ:</span>
-                                        <span className="font-medium">
-                                            {roomData.D0147?.split(' |')?.[1] ?? '-'}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between ">
-                                        <span>คำสั่ง:</span>
-                                        <span>{roomData.D0148?.split(' |')?.[1] ?? '-'}</span>
-                                    </div>
-                                    <div className="flex justify-between ">
-                                        <span>สถานะผิดปกติ:</span>
-                                        <span>{roomData.D0328?.split(' |')?.[1] ?? '-'}</span>
-                                    </div>
-                                    <div className="flex justify-between ">
-                                        <span>ตรวจสอบสินค้า:</span>
-                                        <span>{(roomData.order_work) ? roomData.order_work : '-'}</span>
-                                    </div>
-
-                                    <div className="flex w-full justify-end text-sm text-gray-600">
-                                        X: {new Intl.NumberFormat().format(Number(roomData.dist_x))} |
-                                        Y: {new Intl.NumberFormat().format(Number(roomData.dist_y))}
-                                    </div>
-                                </div>
-                            </Card>
-                        ))}
-                    </div>
-                )}
-            </div>
-        </div>
-    );
+          {/* ปุ่มยืนยัน */}
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            endIcon={<SendIcon />}
+            sx={{
+              mt: 4,
+              py: 1.5,
+              fontSize: '1rem',
+              fontWeight: 600,
+              borderRadius: '10px',
+              textTransform: 'none',
+            }}
+          >
+            ยืนยันการออกใบสั่งซื้อ
+          </Button>
+        </form>
+      </Paper>
+    </Container>
+  );
 }

@@ -38,18 +38,19 @@ export default function LoginPage() {
             const res = await axios.post(`${BASE_API}/login`, {
                 username: username,
                 password: password,
-                remember: remember
+                
             })
 
-            if (res.status === 200) {
-                localStorage.setItem('Credential', JSON.stringify(res.data.loginData))
+            if (res.status === 201) {
+                localStorage.setItem('Credential', JSON.stringify(res.data))
                 Cookies.set('Credential', JSON.stringify(res.data.loginData), {
                     expires: 7, // กำหนดอายุ Cookie (7 วัน)
                     path: '/',  // ทำให้ Cookie ใช้ได้ทุกหน้าในเว็บไซต์
                 });
-                axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
+                axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.access_token
+                    }`;
                 _msg.toast_msg({ title: res.data.msg, progressbar: true, timer: 5, icon: 'success' })
-                router.push('./srm-status')
+                router.push('./dashboards')
             } else if (res.status === 401) {
                 console.log(res.status);
                 _msg.default_msg({ title: res.data.msg })
@@ -82,7 +83,7 @@ export default function LoginPage() {
                                     className='w-full h-full'
                                     src={'/logo/logo-horizontal.png'}
                                 ></Image>
-                                <span className='w-full text-center text-lg'>เข้าสู่ระบบตรวจสอบสินค้า</span>
+                                <span className='w-full text-center text-lg'></span>
                             </div>
                             <div className='flex flex-col mt-10 gap-4 w-full h-full '>
                                 <TextField
@@ -121,9 +122,19 @@ export default function LoginPage() {
                                         </button>
 
                                     </div>
-                                    <span className='w-full font-extralight text-gray-500 px-2'>
-                                        * หากลืมรหัสผ่านกรุณาติดต่อเจ้าหน้าที่
-                                    </span>
+                                    <span
+  className="w-full font-extralight text-gray-500 px-2 hover:text-blue-600 hover:underline cursor-pointer transition"
+  onClick={() => {
+    _msg.toast_msg({
+      title: 'กรุณาติดต่อเจ้าหน้าที่ ภานุพันธ์ นามวงษ์',
+    icon: 'error',
+      timer: 10,
+    width: '450px'
+    });
+  }}
+>
+  * ลืมรหัสผ่าน
+</span>
                                 </div>
                             </div>
                             <div className='mt-10'>

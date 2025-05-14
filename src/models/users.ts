@@ -12,10 +12,11 @@ export interface Users {
 }
 
 // 2 developer ,1 admin , 0 client 
-export type Role = 0 | 1 | 2
+export type Role = any
 
 
 export interface Credential {
+    role: any
     token: string,
     userData: Users
 }

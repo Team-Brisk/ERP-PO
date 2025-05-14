@@ -31,7 +31,7 @@ export default function AppMenu(props: AppMenuProps) {
             return;
         }
         const role = credential.userData.role
-        const crrEmpId = credential.userData.employee_id
+        // const crrEmpId = credential.userData.employee_id
         setCrrEmpId(crrEmpId)
         setRole(role)
     }, [])
@@ -69,7 +69,7 @@ export default function AppMenu(props: AppMenuProps) {
 
 
     return (
-        <>
+        
             <div className="flex flex-col">
                 {
                     menuRoute.map(topic => (
@@ -77,7 +77,7 @@ export default function AppMenu(props: AppMenuProps) {
                             <Divider></Divider>
                             <List >
                                 {topic.menu
-                                    .filter(menu => role === 1 || menu.role === role || role === 2)
+                                    .filter(menu => menu.role === role)
                                     .map((menu, index) => (
                                         <ListItem
                                             key={menu.name}
@@ -86,7 +86,7 @@ export default function AppMenu(props: AppMenuProps) {
                                         >
                                             {
                                                 (isDrawerOpen) ? (
-                                                    <>
+                                                    
                                                         <ListItemButton
                                                             selected={
                                                                 (menu.route === currentPath
@@ -104,9 +104,9 @@ export default function AppMenu(props: AppMenuProps) {
                                                                 {menu.name_th}
                                                             </ListItemText>
                                                         </ListItemButton>
-                                                    </>
+                                                    
                                                 ) : (
-                                                    <>
+                                                    
                                                         <Tooltip
                                                             arrow
                                                             title={menu.name_th}
@@ -131,7 +131,7 @@ export default function AppMenu(props: AppMenuProps) {
                                                                 </ListItemText>
                                                             </ListItemButton>
                                                         </Tooltip>
-                                                    </>
+                                                    
                                                 )
                                             }
 
@@ -142,7 +142,7 @@ export default function AppMenu(props: AppMenuProps) {
                     ))
                 }
             </div>
-        </>
+        
 
     );
 }

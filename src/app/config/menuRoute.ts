@@ -47,7 +47,15 @@ export const menuRoute: Array<TopicRoute> = [
                 icon: GroupIcon,
                 role: 1
             },
+            {
+                name: 'dashboards',
+                name_th: 'หน้าหลัก',
+                route: '/dashboards',
+                icon: QrCodeIcon,
+                role: '1'
+            },
         ]
+        
     },
     {
         name: 'SRM',
@@ -55,10 +63,10 @@ export const menuRoute: Array<TopicRoute> = [
         menu: [
             {
                 name: 'SRM Status',
-                name_th: 'สถานะเครน',
+                name_th: 'ใบสั่งซื้อ',
                 route: '/srm-status',
-                icon: SettingsInputAntennaIcon,
-                role: 0
+                icon: DescriptionIcon,
+                role: '1'
             },
             {
                 name: 'order-manual',
@@ -67,13 +75,7 @@ export const menuRoute: Array<TopicRoute> = [
                 icon: PrecisionManufacturingIcon,
                 role: 0
             },
-            {
-                name: 'orderQueue',
-                name_th: 'สั่งการเครนด้วยคิว',
-                route: '/order-queue',
-                icon: QrCodeIcon,
-                role: 0
-            },
+           
             {
                 name: 'order-product-count',
                 name_th: 'นับจำนวนสินค้า',
