@@ -31,7 +31,7 @@ export default function ForgotPassword() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    document.title = 'สมัครสมาชิก';
+    document.title = 'ลงทะเบียน';
   }, []);
 
   const handlePasswordUpdate = (status: boolean) => {
@@ -91,9 +91,9 @@ export default function ForgotPassword() {
       <Card className="w-[450px] h-auto p-4 rounded-xl shadow-xl bg-white border border-gray-200">
         <div className="flex flex-col items-center gap-2 mb-6">
          
-          <Typography variant="h6" fontWeight="bold" color="primary">
-            สมัครสมาชิก
-          </Typography>
+          <Typography variant="h4" color="primary" gutterBottom>
+   ลงทะเบียน
+</Typography>
         </div>
 
         <FormControl className="flex flex-col gap-4">
@@ -181,7 +181,7 @@ export default function ForgotPassword() {
             }}
             endIcon={loading && <CircularProgress color="inherit" size={20} />}
           >
-            {loading ? 'กำลังสมัคร...' : 'สมัครสมาชิก'}
+            {loading ? 'กำลังสมัคร...' : 'ลงทะเบียน'}
           </Button>
         </FormControl>
       </Card>

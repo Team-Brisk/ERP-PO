@@ -1,6 +1,6 @@
 'use client'
 
-import { Button, Card, Checkbox, FormControl, TextField } from '@mui/material';
+import { Button, Card, Checkbox, FormControl, TextField, Typography } from '@mui/material';
 import '../../styles/tailwind.css'
 import '../../styles/bgPattern.css'
 import { BASE_API } from '@/app/(main)/api';
@@ -69,7 +69,7 @@ export default function LoginPage() {
         router.push('./register')
     }
     return (
-        <div className='w-full min-h-screen h-full max-h-screen obj-center overflow-hidden '>
+      <div className="w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-blue-100 px-4">
             <div className='container h-full flex flex-row justify-center items-center '>
                 <Card className='w-[450px] h-auto p-4 bg-white flex flex-row gap-4'>
                     <div className='w-full flex flex-col gap-6 justify-center items-start h-full'>
@@ -118,7 +118,7 @@ export default function LoginPage() {
                                         <button
                                             onClick={toRegisterPage}
                                             className='w-auto sm:text-right text-gray-500 hover:text-gray-600 hover:-translate-y-1 duration-200 cursor-pointer bg-transparent border-none p-0'>
-                                            สมัครสมาชิก
+                                            ลงทะเบียน
                                         </button>
 
                                     </div>
@@ -128,12 +128,14 @@ export default function LoginPage() {
     _msg.toast_msg({
       title: 'กรุณาติดต่อเจ้าหน้าที่ ภานุพันธ์ นามวงษ์',
     icon: 'error',
-      timer: 10,
+   
     width: '450px'
     });
   }}
 >
+  <Typography variant="caption">
   * ลืมรหัสผ่าน
+</Typography>
 </span>
                                 </div>
                             </div>
