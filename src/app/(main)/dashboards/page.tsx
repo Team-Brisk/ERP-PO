@@ -17,7 +17,7 @@ const setPageTitle = useStoreData((state) => state.setPageTitle)
 
       <Container maxWidth="xl" sx={{ mt: 4 }}>
         <Typography variant="h5" fontWeight="bold" gutterBottom>
-          ERP-PO-TEST
+          ERP-PO
         </Typography>
 
         {/* Summary cards */}
