@@ -1,6 +1,7 @@
 'use client';
 import { Grid, Typography, Box } from '@mui/material';
 import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 const items = [
   { title: 'Orders', value: 2, detail: '2 รายการใหม่วันนี้' },
@@ -9,17 +10,31 @@ const items = [
 ];
 
 export default function SummaryCardsFlip() {
+  const [counts, setCounts] = useState(items.map(() => 0));
+
+  useEffect(() => {
+    const intervals = items.map((item, idx) => {
+      const increment = Math.max(1, Math.floor(item.value / 50)); // กำหนดความเร็ว
+      return setInterval(() => {
+        setCounts((prev) => {
+          const next = [...prev];
+          if (next[idx] < item.value) {
+            next[idx] = Math.min(next[idx] + increment, item.value);
+          }
+          return next;
+        });
+      }, 30); // ความเร็วในการเพิ่มตัวเลข (ms)
+    });
+
+    return () => intervals.forEach(clearInterval); // ล้าง interval เมื่อ component ถูก unmount
+  }, []);
+
   return (
     <Grid container spacing={3}>
       {items.map((item, i) => (
         <Grid item xs={12} sm={6} md={4} key={i}>
-          <Box
-            sx={{
-              perspective: 1000,
-            }}
-          >
+          <Box sx={{ perspective: 1000 }}>
             <motion.div
-              whileHover={{ rotateY: 180 }}
               transition={{ duration: 0.8 }}
               style={{
                 position: 'relative',
@@ -46,7 +61,9 @@ export default function SummaryCardsFlip() {
                 }}
               >
                 <Typography variant="subtitle1">{item.title}</Typography>
-                <Typography variant="h3" fontWeight="bold">{item.value}</Typography>
+                <Typography variant="h3" fontWeight="bold">
+                  {counts[i]}
+                </Typography>
                 <Typography variant="caption">↑ ∞% since last period</Typography>
               </Box>
 
