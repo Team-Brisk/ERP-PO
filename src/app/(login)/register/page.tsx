@@ -32,21 +32,21 @@ export default function ForgotPassword() {
     useEffect(() => {
         document.title = 'Register'
         // getCompany()
-         fetchDepartments();
+        fetchDepartments();
     }, [])
-const fetchDepartments = async () => {
-    try {
-      const res = await axios.get(`${BASE_API}/departments`);
-      if (res.data) {
-        setDepartments(res.data.map((item: any) => ({
-          dept_code: item.dept_code,
-          dept_name: item.dept_name,
-        })));
-      }
-    } catch (err) {
-      console.error('Failed to fetch departments:', err);
-    }
-  };
+    const fetchDepartments = async () => {
+        try {
+            const res = await axios.get(`${BASE_API}/departments`);
+            if (res.data) {
+                setDepartments(res.data.map((item: any) => ({
+                    dept_code: item.dept_code,
+                    dept_name: item.dept_name,
+                })));
+            }
+        } catch (err) {
+            console.error('Failed to fetch departments:', err);
+        }
+    };
 
     // const getCompany = async () => {
     //     try {
@@ -96,7 +96,7 @@ const fetchDepartments = async () => {
                 setConfPassword('')
                 setPassword('')
                 setDeptCode('')
-          
+
             } else if (res.status === 409) {
                 _msg.default_msg({ title: res.data.msg, icon: 'success' })
             } else {
@@ -165,23 +165,23 @@ const fetchDepartments = async () => {
                                 inputLabel: { shrink: true }
                             }}
                         ></TextField>
-                      
+
                         <Autocomplete
                             options={departments}
                             getOptionLabel={(option) => option.dept_name || ''}
                             value={
-                            departments.find((d) => d.dept_code === deptCode) || null // ให้ตั้งค่า deptCode ตรงนี้
+                                departments.find((d) => d.dept_code === deptCode) || null // ให้ตั้งค่า deptCode ตรงนี้
                             }
                             onChange={(e, newValue) => {
-                            setDeptCode(newValue?.dept_code || ''); // ตั้งค่า deptCode
+                                setDeptCode(newValue?.dept_code || ''); // ตั้งค่า deptCode
                             }}
                             renderInput={(params) => (
-                            <TextField {...params} label="หน่วยงาน"fullWidth slotProps={{
-                                inputLabel: { shrink: true }
-                            }} />
+                                <TextField {...params} label="หน่วยงาน" fullWidth slotProps={{
+                                    inputLabel: { shrink: true }
+                                }} />
                             )}
-                    />
-                       <TextField
+                        />
+                        <TextField
 
                             value={roleCode}
                             onChange={(e) => { setRoleCode(e.target.value) }}
@@ -246,6 +246,6 @@ const fetchDepartments = async () => {
                 </Card>
             </div>
         </div>
-      
+
     );
 }

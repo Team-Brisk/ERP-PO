@@ -19,8 +19,11 @@ import { useStoreData } from "@/app/hooks/useStoreData";
 import { color } from "framer-motion";
 import errorHandler from "@/utils/errorHandler";
 import { PoMaster } from "@/models/poMaster";
+import { fetchOrder } from "@/app/services/orderService";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 // const currentUserRole = useStoreData((state) => state.currentUserRole); // สมมุติว่าดึงจาก store
-
 
 const DRAWER_WIDTH = 240;
 
@@ -29,13 +32,21 @@ interface gridVal {
 }
 
 export default function OrderPage() {
+    //--------------------------FillTer-------------------------------/////
+    const [orderFilter, setOrderFilter] = useState('');
+    const [lineFilter, setLineFilter] = useState('');
+    const [sequenceFilter, setSequenceFilter] = useState('');
+    const [partnerFilter, setPartnerFilter] = useState('');
+    const [siteFilter, setSiteFilter] = useState('');
+    const [dateFilter, setDateFilter] = useState<string>('');
+    //---------------------------------------------------------/////
     const router = useRouter();
     const pathName = usePathname();
     const _msg = new MsgAlert();
     const [loggedInRole, setLoggedInRole] = useState<number | null>(null);
 
     const setFromPage = useStoreData((state) => state.setFromPage)
-    const [users, setUsers] = useState<Array<Users>>()
+    const [users, setUsers] = useState<Array<PoMaster>>()
     const [dataLoading, setDataLoading] = useState<boolean>(false)
     const [totalItem, setTotalItem] = useState<number>(0)
     const [page, setPage] = useState(0)  // Page number (0-indexed)
@@ -46,20 +57,16 @@ export default function OrderPage() {
     const [dataGridWidth, setDataGridWidth] = useState<number | null>(null);
     const [lastKnownWidth, setLastKnownWidth] = useState<number | null>(null);
     const dataGridRef = useRef<HTMLDivElement>(null);
-    const getRoleProps = (role: number) => {
-        switch (role) {
-            case 0:
-                return { label: 'ผู้ใช้งาน', color: 'default' };
-            case 1:
-                return { label: 'หัวหน้างาน', color: 'primary' };
-            case 2:
-                return { label: 'ผู้พัฒนาระบบ', color: 'warning' };
-            default:
-                return { label: 'ไม่ทราบสิทธ์', color: 'error' };
-        }
-    };
-
-    const [order, setOrder] = useState<{ id:string, order_no: string; }[]>([]);
+    const [poMaster, setPoMaster] = useState<Array<PoMaster>>()
+    const filteredUsers = (users || []).filter((u) =>
+        (u.order_no || '').toLowerCase().includes(orderFilter.toLowerCase()) &&
+        String(u.line || '').toLowerCase().includes(lineFilter.toLowerCase()) &&
+        String(u.sequence || '').toLowerCase().includes(sequenceFilter.toLowerCase()) &&
+        (u.buy_from_partner_code || '').toLowerCase().includes(partnerFilter.toLowerCase()) &&
+        (u.site_code || '').toLowerCase().includes(siteFilter.toLowerCase()) &&
+        (!dateFilter || (u.created_at && new Date(u.created_at).toISOString().slice(0, 10) === dateFilter))
+    );
+    const [order, setOrder] = useState<{ id: string, order_no: string; }[]>([]);
     const [order_no, setOrder_no] = useState('');
     useEffect(() => {
         const credentialString = localStorage.getItem('Credential');
@@ -83,23 +90,30 @@ export default function OrderPage() {
         if (search !== '') {
             setPage(0);
         }
-         fetchOrder();
+
+        const loadOrder = async () => {
+            const data = await fetchOrder();
+            setOrder(data);
+        };
+        loadOrder();
+        //  fetchOrder();
         setSearchTrigger(Date.now())
     }, [search])
-const fetchOrder= async () => {
-  try {
-    const res = await axios.post(`${BASE_API}/po/getAllOrder`);
-    if (res.data) {
-      const data = res.data.map((item: any) => ({
-        id: item.id,             // ✅ เพิ่ม id ที่ไม่ซ้ำ
-        order_no: item.order_no, // ✅ ควรใช้ชื่อให้ตรงกับจริง
-      }));
-      setOrder(data);
-    }
-  } catch (err) {
-    console.error('Failed to fetch orders:', err);
-  }
-};
+
+    // const fetchOrder= async () => {
+    //   try {
+    //     const res = await axios.post(`${BASE_API}/po/getAllOrder`);
+    //     if (res.data) {
+    //       const data = res.data.map((item: any) => ({
+    //         id: item.id,             // ✅ เพิ่ม id ที่ไม่ซ้ำ
+    //         order_no: item.order_no, // ✅ ควรใช้ชื่อให้ตรงกับจริง
+    //       }));
+    //       setOrder(data);
+    //     }
+    //   } catch (err) {
+    //     console.error('Failed to fetch orders:', err);
+    //   }
+    // };
 
 
     const deleteUser = async (userId: number) => {
@@ -122,35 +136,13 @@ const fetchOrder= async () => {
 
     const fetchUser = async () => {
         try {
-            // setDataLoading(true)
-            // let startItem
-            // let endItem
-            // startItem = page * pageSize  // คำนวณ startItem และ endItem
-            // endItem = startItem + pageSize - 1
 
-            // let data = {}
-            // let api = `${BASE_API}`
+            const res = await axios.post(`${BASE_API}/po/getAllPOsPost`, {
+                order_no, // ✅ Send this to the backend
+            });
 
-            // if (search != '') {
-            //     api = api + `/search_users`
-            //     data = {
-            //         search,
-            //         startItem,
-            //         endItem
-            //     }
-            // } else {
-            //     api = api + `/get_users_list`
-            //     data = {
-            //         startItem,
-            //         endItem
-            //     }
-            // }
-           const res = await axios.post(`${BASE_API}/po/getAllPOsPost`, {
-      order_no, // ✅ Send this to the backend
-    });
-       
 
-             setTotalItem(res.data.length)
+            setTotalItem(res.data.length)
             setUsers(res.data)
         } catch (err: any) {
             errorMessage({ message: err })
@@ -160,43 +152,88 @@ const fetchOrder= async () => {
     }
 
     const cols: GridColDef[] = [
+        //-----------------Order-------------------------//
         {
-            field: 'emp_id',
+            field: 'Order',
             headerName: 'Order',
-            
-            width: 130,
             align: 'center',
             headerAlign: 'center',
             filterable: false,
             sortable: false,
+            width: 130,
             disableColumnMenu: true,
-            resizable: false,
-            renderCell: (p: gridVal) => {
-                return (
-
-                    <span> {p.row.order_no} </span>
-
-                )
-            }
+            renderHeader: () => (
+                <div
+                    style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',  // horizontally center
+                        justifyContent: 'center', // vertically center if needed
+                        gap: 4,
+                    }}
+                >
+                    <strong>Order</strong>
+                    <TextField
+                        value={orderFilter}
+                        onChange={(e) => setOrderFilter(e.target.value)}
+                        variant="outlined"
+                        placeholder=""
+                        size="small"
+                        sx={{
+                            backgroundColor: '#ffffff',
+                            color: '#000000',
+                            '& .MuiInputBase-input': {
+                                color: '#000000',
+                                padding: '4px 8px',
+                                textAlign: 'center',
+                            },
+                            '& fieldset': {
+                                borderColor: '#000000',
+                            },
+                            '&:hover fieldset': {
+                                borderColor: '#000000',
+                            },
+                            '&.Mui-focused fieldset': {
+                                borderColor: '#000000',
+                            },
+                        }}
+                        InputProps={{ sx: { color: '#000000' } }}
+                        InputLabelProps={{ sx: { color: '#000000' }, shrink: true }}
+                    />
+                </div>
+            ),
+            renderCell: (p: gridVal) => <span>{p.row.order_no}</span>,
         },
+
+        //-----------------Line-------------------------//
         {
-            field: 'users',
+            field: 'line',
             headerName: 'Line',
-            width: 50,
-            align: 'center',
-            filterable: false,
-            sortable: false,
-            disableColumnMenu: true,
-            resizable: false,
-            renderCell: (p: gridVal) => {
-                return (
-                    <span> {p.row.line} </span>
+            width: 100,
+            sortable: true, // ✅ will work because field matches the data key
+            // renderHeader: () => (
+            //     <div className="flex flex-col items-center">
+            //         <strong>Line</strong>
+            //         <TextField
+            //             value={lineFilter}
+            //             onChange={(e) => setLineFilter(e.target.value)}
+            //             variant="standard"
+            //             placeholder=""
+            //             InputProps={{ disableUnderline: true }}
+            //             size="small"
+            //             sx={{ textAlign: 'center' }}
+            //         />
+            //     </div>
+            // ),
+            renderCell: (p: { row: PoMaster }) => <span>{p.row.line}</span>,
+        }
+        ,
 
-                )
-            }
-        },
+
+
+        //-----------------Sequence-------------------------//
         {
-            field: 'username',
+            field: 'Sequence',
             headerName: 'Sequence',
             width: 100,
             align: 'center',
@@ -213,8 +250,9 @@ const fetchOrder= async () => {
                 )
             }
         },
+        //-----------------Buy from Business Partner-------------------------//
         {
-            field: 'fullname',
+            field: 'Buy from Business Partner',
             headerName: 'Buy from Business Partner',
             width: 200,
             align: 'left',
@@ -227,17 +265,18 @@ const fetchOrder= async () => {
                 return (
                     <>
                         <span>
-                            {p.row.buy_from_partner_code} 
+                            {p.row.buy_from_partner_code}
                         </span>
                     </>
                 )
             }
         },
+        //-----------------------Site-------------------------------//
         {
-            field: 'srm_resp',
+            field: 'Site',
             headerName: 'Site',
-            width: 150,
-            align: 'center',
+            width: 200,
+            align: 'left',
             headerAlign: 'center',
             filterable: false,
             sortable: false,
@@ -246,41 +285,49 @@ const fetchOrder= async () => {
             renderCell: (p: gridVal) => {
                 return (
                     <>
-                        <span> {p.row.site_code} </span>
+                        <span>
+                            {p.row.site_code}
+                        </span>
+                    </>
+                )
+            }
+        },
+        //-----------------------date-------------------------------//
+        {
+            field: 'date',
+            headerName: 'date',
+            width: 200,
+            align: 'center',
+            headerAlign: 'center',
+            filterable: false,
+            sortable: false,
+            disableColumnMenu: true,
+            resizable: false,
+            renderCell: (p: gridVal) => {
+                const formattedDate = p.row.created_at
+                    ? new Date(p.row.created_at).toLocaleDateString('th-TH') // หรือ 'en-GB' สำหรับ dd/mm/yyyy
+                    : '-';
+                return (
+                    <>
+                        <span> {formattedDate} </span>
 
                     </>
                 )
             }
         },
-        // {
-        //     field: 'role',
-        //     headerName: 'Item',
-        //     width: 150,
-        //     align: 'center',
-        //     headerAlign: 'center',
-        //     filterable: false,
-        //     sortable: false,
-        //     disableColumnMenu: true,
-        //     resizable: false,
-        //     renderCell: (p: gridVal) => {
-               
-        //         return (
-
-        //            <span> {p.row.item_code} </span>
-
-        //         )
-        //     }
-        // },
-    {
-  field: 'Details',
-  headerName: 'Item Details',
-  width: 200,
-  renderCell: (p: gridVal) => (
-    <div className="flex flex-col">
-       <span>{p.row.item_code} - {p.row.item_description}</span>
-    </div>
-  )
-} , {
+        //-----------------------Item Details-------------------------------//
+        {
+            field: 'Item Details',
+            headerName: 'Item Details',
+            width: 200,
+            renderCell: (p: gridVal) => (
+                <div className="flex flex-col">
+                    <span>{p.row.item_code} - {p.row.item_description}</span>
+                </div>
+            )
+        },
+        //-----------------------project------------------------------//
+        {
             field: 'project',
             headerName: 'Project',
             width: 200,
@@ -293,13 +340,12 @@ const fetchOrder= async () => {
             renderCell: (p: gridVal) => {
                 return (
                     <>
-                         <span> {p.row.project} </span>
-
-
+                        <span> {p.row.project} </span>
                     </>
                 )
             }
         },
+        //-----------------------Ordered_Quantity------------------------------//
         {
             field: 'Ordered_Quantity',
             headerName: 'Ordered_Quantity',
@@ -313,14 +359,16 @@ const fetchOrder= async () => {
             renderCell: (p: gridVal) => {
                 return (
                     <>
-                         <span> {p.row.ordered_quantity} </span>
+                        <span> {p.row.ordered_quantity} </span>
 
 
                     </>
                 )
             }
         },
-         {
+        //-----------------------Received_Quantity------------------------------//
+
+        {
             field: 'Received_Quantity',
             headerName: 'Received_Quantity',
             width: 200,
@@ -333,14 +381,15 @@ const fetchOrder= async () => {
             renderCell: (p: gridVal) => {
                 return (
                     <>
-                         <span> {p.row.received_quantity} </span>
+                        <span> {p.row.received_quantity} </span>
 
 
                     </>
                 )
             }
         },
-         {
+        //-----------------------Price------------------------------//
+        {
             field: 'Price',
             headerName: 'Price',
             width: 200,
@@ -353,135 +402,126 @@ const fetchOrder= async () => {
             renderCell: (p: gridVal) => {
                 return (
                     <>
-                         <span> {p.row.price} </span>
+                        <span> {p.row.price} </span>
 
 
                     </>
                 )
             }
         },
-        
-
     ]
 
     return (
-        
-            <Paper
-                // sx={{ height: 'calc(100vh - 100px)', }}
-                className="min-w-0 w-full flex flex-col py-4 gap-2"
 
-            >  
-          <div className="flex flex-row gap-4 px-4 pb-2">
-            <div className="w-1/2">
-                <Autocomplete
-                    options={order}
-                    getOptionLabel={(option) => option.order_no || ''}
-                    isOptionEqualToValue={(opt, val) => opt.id === val.id}
-                    value={order.find((d) => d.order_no === order_no) || null}
-                    onChange={(e, newValue) => {
-                        setOrder_no(newValue?.order_no || '');
-                        setSearchTrigger(Date.now());
-                    }}
-                    renderInput={(params) => (
-                        <TextField
-                        {...params}
-                        label="ค้นหา Order"
-                        fullWidth
-                        InputLabelProps={{ shrink: true }}
+        <Paper
+            // sx={{ height: 'calc(100vh - 100px)', }}
+            className="min-w-0 w-full flex flex-col py-4 gap-2"
+
+        >
+            <div className="flex flex-row gap-4 px-4 pb-2">
+                {/* ซ้าย: Autocomplete */}
+                <div className="w-1/2">
+                    <Autocomplete
+                        options={order}
+                        getOptionLabel={(option) => option.order_no || ''}
+                        isOptionEqualToValue={(opt, val) => opt.id === val.id}
+                        value={order.find((d) => d.order_no === order_no) || null}
+                        onChange={(e, newValue) => {
+                            setOrder_no(newValue?.order_no || '');
+                            setSearchTrigger(Date.now());
+                        }}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                label="ค้นหา Order"
+                                fullWidth
+                                size="small"
+                                InputLabelProps={{ shrink: true }}
+                                sx={{
+                                    height: '60px', // ทำให้สูงเท่ากับ DatePicker
+                                }}
+                            />
+                        )}
+                        disableClearable={false}
+                        openOnFocus
+                    />
+                </div>
+
+                {/* ขวา: Date Picker */}
+                <div className="w-1/2">
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                            label="วันที่"
+                            value={dateFilter ? dayjs(dateFilter) : null}
+                            onChange={(newValue) => {
+                                setDateFilter(newValue?.format('YYYY-MM-DD') || '');
+                            }}
+                            slotProps={{
+                                textField: {
+                                    fullWidth: true,
+                                    size: 'small',
+                                    sx: {
+                                        height: '60px',
+                                    },
+                                    InputLabelProps: { shrink: true },
+                                },
+                            }}
                         />
-                    )}
-                    disableClearable={false}
-                    openOnFocus
-                    // filterOptions={(x) => x}
-                    />
+                    </LocalizationProvider>
+                </div>
             </div>
 
-            <div className="w-1/2">
-                {/* <Autocomplete
-                options={order} // หรือเปลี่ยนเป็น options อื่น เช่น `projects`
-                getOptionLabel={(option) => option.order_no || ''}
-                isOptionEqualToValue={(opt, val) => opt.id === val.id}
-                value={order.find((d) => d.order_no === order_no) || null}
-                onChange={(e, newValue) => {
-                    setOrder_no(newValue?.order_no || '');
+
+
+            <Divider sx={{ borderColor: '#1976d2' }} />
+            <DataGrid
+                ref={dataGridRef}
+                style={{ width: isDrawerOpen ? `${dataGridWidth}px` : '100%' }} // ถ้าไม่มีค่า ใช้ 100% 
+                sx={{
+                    border: 0,
+                    //                  '& .super-app-theme--header': {
+                    //                     backgroundColor: 'rgba(212, 223, 245, 0.94)',
+
+                    // }, 
+                    borderColor: '#ccc', // กรอบรอบนอก
+                    '& .MuiDataGrid-cell': {
+                        borderRight: '1px solid #ccc',
+                        borderBottom: '1px solid #ccc',
+                    },
+                    '& .MuiDataGrid-columnHeaders': {
+                        borderBottom: '2px solid #1976d2',
+                    },
+                    '& .MuiDataGrid-columnHeader': {
+                        borderRight: '1px solid #ccc',
+                        backgroundColor: 'rgba(212, 223, 245, 0.94)', // หรือรวมกับ class super-app-theme--header
+                    },
+                    '& .MuiDataGrid-row': {
+                        backgroundColor: '#fff',
+                    }, '& .MuiDataGrid-row:nth-of-type(odd)': {
+                        backgroundColor: '#ffffff',  // สีเทาอ่อน
+                    },
+                    '& .MuiDataGrid-row:nth-of-type(even)': {
+                        backgroundColor: '#ffffff',  // สีขาว
+                    },
+
                 }}
-                renderInput={(params) => (
-                    <TextField
-                    {...params}
-                    label="ค้นหา Order (อีกอัน)"
-                    fullWidth
-                    InputLabelProps={{ shrink: true }}
-                    />
-                )}
-                disableClearable={false}
-                openOnFocus
-                filterOptions={(x) => x}
-                /> */}
-            </div>
-            </div>
+                density={'comfortable'}
+                loading={dataLoading}
+                rows={filteredUsers}
+                columns={cols}
+                getRowId={(row) => row.id} // ✅ บอกให้ใช้ `id` ของแต่ละ row
+                checkboxSelection={false}
+                pagination
+                paginationMode="server"
+                rowCount={totalItem}
+                paginationModel={{ page, pageSize }}
+                onPaginationModelChange={(model) => {
+                    setPage(model.page)
+                    setPageSize(model.pageSize)
+                }}
+                pageSizeOptions={[25, 50, 100]}
+            />
+        </Paper>
 
-                                    
-              {/* <div className="flex justify-end gap-2 pb-2 px-4">
-            //         <TextField
-            //             value={search}
-            //             onChange={(e) => setSearch(e.target.value)}
-            //             size='medium'
-            //             className='w-auto min-w-[600px]'
-            //             label={'ค้นหา'}
-            //             placeholder=''
-            //             InputLabelProps={{
-            //                 shrink: true
-            //             }}>
-            //         </TextField>
-            //     </div> */}
-              <Divider sx={{ borderColor: '#1976d2' }} />  
-                <DataGrid
-                    ref={dataGridRef}
-                    style={{ width: isDrawerOpen ? `${dataGridWidth}px` : '100%' }} // ถ้าไม่มีค่า ใช้ 100% 
-                    sx={{ border: 0 ,
-        //                  '& .super-app-theme--header': {
-        //                     backgroundColor: 'rgba(212, 223, 245, 0.94)',
-          
-        // }, 
-        borderColor: '#ccc', // กรอบรอบนอก
-    '& .MuiDataGrid-cell': {
-      borderRight: '1px solid #ccc',
-      borderBottom: '1px solid #ccc',
-    },
-    '& .MuiDataGrid-columnHeaders': {
-      borderBottom: '2px solid #1976d2',
-    },
-    '& .MuiDataGrid-columnHeader': {
-      borderRight: '1px solid #ccc',
-      backgroundColor: 'rgba(212, 223, 245, 0.94)', // หรือรวมกับ class super-app-theme--header
-    },
-    '& .MuiDataGrid-row': {
-      backgroundColor: '#fff',
-    },    '& .MuiDataGrid-row:nth-of-type(odd)': {
-  backgroundColor: '#ffffff',  // สีเทาอ่อน
-},
-'& .MuiDataGrid-row:nth-of-type(even)': {
-  backgroundColor: '#ffffff',  // สีขาว
-},
-                 
-                    }}
-                    density={'comfortable'}
-                    loading={dataLoading}
-                    rows={users}
-                    columns={cols}
-                      getRowId={(row) => row.id} // ✅ บอกให้ใช้ `id` ของแต่ละ row
-                    checkboxSelection={false}
-                    pagination
-                    paginationMode="server"
-                    rowCount={totalItem}
-                    paginationModel={{ page, pageSize }}
-                    onPaginationModelChange={(model) => {
-                        setPage(model.page)
-                        setPageSize(model.pageSize)
-                    }}
-                    pageSizeOptions={[25, 50, 100]}
-                />
-            </Paper>
-        
     )
 }
