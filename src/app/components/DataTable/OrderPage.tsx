@@ -120,7 +120,7 @@ export default function OrderPage() {
         try {
             const isConfirmed = await _msg.confirm('คุณต้องการลบผู้ใช้งานใช่ไหม');
             if (isConfirmed) {
-                const res = await axios.post(`${BASE_API}/getAllPOs`)
+                const res = await axios.post(`${BASE_API}/getAlPOs`)
                 if (res.status === 200) {
                     successMessage(res.data.msg)
                     fetchUser()
@@ -263,11 +263,7 @@ export default function OrderPage() {
             resizable: false,
             renderCell: (p: gridVal) => {
                 return (
-                    <>
-                        <span>
-                            {p.row.buy_from_partner_code}
-                        </span>
-                    </>
+                    <span>{p.row.buy_from_partner_code} </span>
                 )
             }
         },
@@ -464,6 +460,9 @@ export default function OrderPage() {
                                         height: '60px',
                                     },
                                     InputLabelProps: { shrink: true },
+                                },
+                                actionBar: {
+                                    actions: ['clear', 'accept'], // เพิ่มปุ่ม Clear
                                 },
                             }}
                         />
